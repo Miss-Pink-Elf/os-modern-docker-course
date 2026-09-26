@@ -58,27 +58,27 @@
 	- `-d` — запуск в **detached-режиме** (в фоне), терминал остаётся свободным. Используется для сервисов, которые должны работать постоянно.
 	- `--name lab-web-ksenia` — задаём **своё имя** контейнеру вместо автоматически сгенерированного (`zealous_poincare` и т.п.). Это упрощает управление: можно обращаться по имени, а не по ID.
 	- `-p 8080:80` — **проброс портов**: порт 80 внутри контейнера становится доступен на порту 8080 хоста. Формат `ХОСТ:КОНТЕЙНЕР`.
-	![[Pasted image 20260924010331.png]]
+	![[nginx8080.png]]
 - **Перезапуск сервиса на порту `8081:80`:**
 	```powershell
 	PS C:\Users\Пользователь> docker ps
-CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                     NAMES
-5f00aabf388f   nginx:1.31.6-alpine   "/docker-entrypoint.…"   8 minutes ago   Up 8 minutes   0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   lab-web-ksenia
-PS C:\Users\Пользователь> docker stop lab-web-ksenia
-lab-web-ksenia
-PS C:\Users\Пользователь> docker rm lab-web-ksenia
-lab-web-ksenia
-PS C:\Users\Пользователь> docker ps
-CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
-PS C:\Users\Пользователь>   docker run -d --name lab-web-ksenia -p 8081:80 nginx:1.31.6-alpine
-072e89216e60b3bdb28927af1b2387c706f41a5f91338e3cd6093422248163fc
-PS C:\Users\Пользователь> docker ps
-CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                     NAMES
-072e89216e60   nginx:1.31.6-alpine   "/docker-entrypoint.…"   4 seconds ago   Up 4 seconds   0.0.0.0:8081->80/tcp, [::]:8081->80/tcp   lab-web-ksenia
+	CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                     NAMES
+	5f00aabf388f   nginx:1.31.6-alpine   "/docker-entrypoint.…"   8 minutes ago   Up 8 minutes   0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   lab-web-ksenia
+	PS C:\Users\Пользователь> docker stop lab-web-ksenia
+	lab-web-ksenia
+	PS C:\Users\Пользователь> docker rm lab-web-ksenia
+	lab-web-ksenia
+	PS C:\Users\Пользователь> docker ps
+	CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+	PS C:\Users\Пользователь>   docker run -d --name lab-web-ksenia -p 8081:80 nginx:1.31.6-alpine
+	072e89216e60b3bdb28927af1b2387c706f41a5f91338e3cd6093422248163fc
+	PS C:\Users\Пользователь> docker ps
+	CONTAINER ID   IMAGE                 COMMAND                  CREATED         STATUS         PORTS                                     NAMES
+	072e89216e60   nginx:1.31.6-alpine   "/docker-entrypoint.…"   4 seconds ago   Up 4 seconds   0.0.0.0:8081->80/tcp, [::]:8081->80/tcp   lab-web-ksenia
 	```
 	- `docker stop` — корректно останавливает контейнер (посылает SIGTERM, потом SIGKILL при необходимости). Контейнер переходит в статус `Exited`.
 	- `docker rm` — удаляет остановленный контейнер. Без этого имя `lab-web-ksenia` останется занятым, и новый контейнер с тем же именем не запустится.
-	![[Pasted image 20260924010657.png]]
+	![[nginx8081.png]]
 	**Порт 8081 зафиксирован как рабочий для всех последующих заданий.**
 
 Ссылки на раздел лекций:
@@ -119,13 +119,13 @@ CONTAINER ID   IMAGE                 COMMAND                  CREATED         ST
 	    - `/usr/share/nginx/html` — стандартная папка статики nginx.
 	    - `:ro` — **read-only**: контейнер может читать файлы, но не может их изменять или создавать новые.
 	- Формат `-v`: сначала **HOST**, потом **CONTAINER**. Легко запомнить: «откуда → куда».
-	![[Pasted image 20260924013611.png]]
+	![[hello8081.png]]
 
 - **Изменение файла на хосте, обновление страницы.**
 	```powershell
 	PS C:\Users\Пользователь> "<h1>Пока</h1>" | Set-Content .\site\index.html  
 	```
-    ![[Pasted image 20260924013947.png]]
+    ![[bye8081.png]]
     Данные в bind-mount хранятся **на хосте** в папке `site`, а не внутри контейнера. Контейнер лишь «смотрит» на эту папку через точку монтирования. Когда контейнер удаляется, Docker удаляет только его собственную файловую систему (writable layer), но **не трогает папки хоста**. Поэтому файл `index.html` останется на месте, и если запустить новый контейнер с тем же `-v`, он снова увидит этот файл.
 	```powershell
 	PS C:\Users\Пользователь> docker stop lab-web-ksenia
@@ -157,7 +157,7 @@ docker exec -it lab-web-ksenia /bin/sh
 	- `/bin/sh` — команда, которую запускаем. В Alpine Linux есть `/bin/sh` (легковесный shell), но нет `bash`.
 	
 - **Просмотр содержания каталога со статикой (по пути `/usr/share/nginx/html`):**
-![[Pasted image 20260924032833.png]]
+![](Pasted image 20260924032833.png)
 Здесь виден файл `index.html` — тот самый, что мы создали на хосте. Через bind-mount он «проброшен» внутрь контейнера. Контейнер видит его как обычный файл, не подозревая, что физически тот лежит на хосте.
 
 - **Проверка поведения с `read-only`: попытка создания файла внутри каталога статики:**
@@ -203,7 +203,7 @@ Mode                 LastWriteTime         Length Name
 
 - **Просмотр последних строк журнала контейнера:**
 	С помощью команды `docker logs --tail 10 lab-web-ksenia`:
-![[Pasted image 20260924040212.png]]
+![[logs.png]]
 Флаг `--tail 10` показывает **последние 10 строк**. Без него вывелись бы все логи с момента запуска.
 Заметим, что после первой загрузки статус 200(ОК) сменился на 304(Not Modified), а при переходе на несуществующий путь стал 404(Not Found).
 
@@ -272,14 +272,14 @@ docker inspect lab-web-ksenia
 docker inspect lab-web-ksenia --format "{{json .Mounts}}"
 ```
 Mounts:
-![[Pasted image 20260924044146.png]]
+![[mounts.png]]
 Блок `Mounts` показывает все точки монтирования контейнера. Для bind-mount указывается `"Type": "bind"` и путь на хосте в `Source`. Для Docker-тома было бы `"Type": "volume"` и `Source` вида `/var/lib/docker/volumes/<имя>/_data`.
 
 ```powershell
 docker inspect lab-web-ksenia --format "{{json .NetworkSettings.Ports}}"
 ```
 Ports:
-![[Pasted image 20260924044413.png]]
+![[ports.png]]
 Блок `Ports` в `NetworkSettings` показывает проброс портов. Ключ — порт внутри контейнера (`80/tcp`), значение — массив привязок на хосте (`HostPort: 8081`). Это соответствует флагу `-p 8081:80` при запуске.
 
 Ссылки на разделы лекций 
@@ -300,8 +300,8 @@ Untagged: nginx@sha256:1ed1b0e1d7652937d6cbdaf4018c7b6fc009a7dd6c3047351e2eddda7
 ```
 Для удаления образа воспользовались командой `docker rmi nginx:1.31.6-alpine`.
 Образ возможно удалить только в том случае, когда все его контейнеры остановлены и удалены. Поэтому если не удается удалить образ, то сначала нужно проверить контейнеры и потом попытаться удалить еще раз, либо применить флаг -f при удалении, что не приветствуется.
-![[Pasted image 20260924120932.png]]
-![[Pasted image 20260924121318.png]]
+![[ps.png]]
+![[images.png]]
 среди присутствующих образов нет того, что использовали мы в лабораторной работе.
 
 Ссылки на разделы лекций:
