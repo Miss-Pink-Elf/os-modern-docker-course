@@ -80,3 +80,25 @@ ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads",
 ## Ссылка на Docker Hub
 - Образ: `bibimka/image-lab:97d1d5b4`
 - Репозиторий: https://hub.docker.com/r/bibimka/image-lab/tags
+
+---
+## Доп. материалы
+Dockerfile "наивной" сборки:
+```GitBash
+FROM python:3.12
+
+WORKDIR /app
+
+COPY requirements.txt .
+COPY app/ ./app/
+
+RUN pip install -r requirements.txt
+
+EXPOSE 8000
+ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8000", "app.app:app"]
+```
+Использовался полный базовый образ `python:3.12` (без `-slim`), зависимости устанавливались одной командой без флага `--no-cache-dir`, а исходный код копировался до установки пакетов.
+Сборка образа:
+![dockerfile_naive](img_02/dockerfile_naive.png)
+Сравнение образов:
+![images_compare](img_02/images_compare.png)
