@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+*.log
+.git
+.env
+.vscode
+.idea
+.DS_Store
+
+seed-*.json
+README.md
+Dockerfile
+.dockerignore
